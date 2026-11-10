@@ -91,17 +91,28 @@ def sync(hist):
 
 def fetch_x():
     os.makedirs(OUT, exist_ok=True)
-    got = {}
-    for person in PEOPLE:
-        try:
-            req = urllib.request.Request("https://api.fxtwitter.com/" + person["x"], headers=UA)
-            with urllib.request.urlopen(req, timeout=20) as r:
-                user = json.load(r).get("user") or {}
-            if isinstance(user.get("followers"), int):
-                got[str(person["no"])] = user["followers"]
-        except Exception as e:
-            print(f"x{person['no']}: {e}", file=sys.stderr)
-        time.sleep(0.5)
+    got, todo = {}, list(PEOPLE)
+    # The public API drops a few requests now and then; go back for the misses after a pause.
+    for attempt in range(3):
+        if attempt:
+            time.sleep(5 * attempt)
+        missed = []
+        for person in todo:
+            try:
+                req = urllib.request.Request("https://api.fxtwitter.com/" + person["x"], headers=UA)
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    user = json.load(r).get("user") or {}
+                if isinstance(user.get("followers"), int):
+                    got[str(person["no"])] = user["followers"]
+                else:
+                    missed.append(person)
+            except Exception as e:
+                missed.append(person)
+                print(f"x{person['no']} (try {attempt + 1}): {e}", file=sys.stderr)
+            time.sleep(1)
+        todo = missed
+        if not todo:
+            break
     with open(os.path.join(OUT, "x.json"), "w") as f:
         json.dump({"at": now_ms(), "x": got}, f)
     print("x:", got)
