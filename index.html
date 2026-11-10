@@ -67,6 +67,7 @@ h1 { margin: 0; font-family: var(--f-display); font-size: 24px; line-height: 1.3
 .fresh { margin: 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .live { width: 8px; height: 8px; border-radius: 50%; background: var(--up); flex: none; }
 .fresh b { color: var(--ink-2); font-weight: 600; }
+.fresh-pl { flex-basis: 100%; }
 .stale { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 0; }
 
 /* Hiyori's card */
@@ -274,12 +275,12 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
   <footer class="notes">
     <p>フォロワー数は、各SNSの公開プロフィールから自動で読み取っています。アカウントはエールボートの公式エントリー情報に載っているものです。</p>
     <p>TikTokは1万人を超えると100人単位でしか表示されないため、「約」がついた数字は概数です。</p>
-    <p>前日比は約24時間前、週間比は約7日前の記録との差です。記録は運営側のパソコンが起動している間、約1時間ごとに更新されます。ページを開いたままでも、新しい記録が出ると自動で切り替わります。</p>
+    <p>前日比は約24時間前、週間比は約7日前の記録との差です。記録は約1時間ごとに更新されます。InstagramとTikTokは運営側のパソコンが起動している間だけ、XはGitHubのサーバーで常に更新されます。ページを開いたままでも、新しい記録が出ると自動で切り替わります。</p>
     <p class="links" id="links"></p>
   </footer>
 </div>
 
-<script type="application/json" id="snapshot">{"builtAt":1794301280902,"people":[{"no":1,"name":"田中美海","x":"misskindai26_1","ig":"miss.kindai2026_no.1","tt":"misskindai2026_1"},{"no":2,"name":"白石ひより","x":"misskindai26_2","ig":"miss.kindai2026_no.2","tt":"misskindai2026_2"},{"no":3,"name":"三好愛美","x":"misskindai26_3","ig":"miss.kindai2026_no.3","tt":"misskindai2026_3"},{"no":4,"name":"鈴木凛々子","x":"misskindai26_4","ig":"miss.kindai2026_no.4","tt":"misskindai2026_4"},{"no":5,"name":"仲子和里","x":"misskindai26_5","ig":"miss.kindai2026_no.5","tt":"misskindai2026_5"},{"no":6,"name":"山口小巻","x":"misskindai26_6","ig":"miss.kindai2026_no.6","tt":"misskindai2026_6"},{"no":7,"name":"月城安菜","x":"misskindai26_7","ig":"miss.kindai2026_no.7","tt":"misskindai2026_7"},{"no":8,"name":"高賀音羽","x":"misskindai26_8","ig":"miss.kindai2026_no.8","tt":"misskindai2026_8"},{"no":9,"name":"松本七乃葉","x":"misskindai26_9","ig":"miss.kindai2026_no.9","tt":"misskindai2026_9"}],"samples":[{"t":1794287463549,"x":{"1":1102,"2":8639,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4616,"9":315},"ig":{"1":2355,"2":5417,"3":981,"4":955,"5":892,"6":2830,"7":748,"8":8022,"9":1184},"tt":{"1":8908,"2":8765,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}},{"t":1794288670143,"x":{"1":1102,"2":8657,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4617,"9":315},"ig":{"1":2355,"2":5429,"3":981,"4":955,"5":893,"6":2830,"7":748,"8":8024,"9":1184},"tt":{"2":8770,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}},{"t":1794292269459,"x":{"1":1102,"2":8701,"3":468,"4":765,"5":457,"6":6604,"7":362,"8":4618,"9":315},"ig":{"1":2356,"2":5441,"3":981,"4":955,"5":893,"6":2832,"7":748,"8":8029,"9":1184},"tt":{"2":8781,"3":2136,"4":11700,"5":1024,"6":6747,"7":1825,"8":23200,"9":1421}},{"t":1794295867314,"x":{"1":1102,"2":8744,"3":468,"4":765,"5":457,"6":6605,"7":361,"9":315},"ig":{"1":2355,"2":5453,"3":981,"4":955,"5":893,"6":2833,"7":747,"8":8032,"9":1183},"tt":{"2":8789,"3":2136,"4":11700,"5":1025,"6":6748,"7":1824,"8":23200,"9":1422}},{"t":1794301280902,"x":{"1":1102,"2":8782,"3":468,"4":764,"6":6605,"7":361,"8":4621},"ig":{"1":2356,"2":5467,"3":981,"4":955,"5":895,"6":2833,"7":747,"8":8037,"9":1184},"tt":{"2":8804,"3":2144,"4":11700,"5":1025,"6":6751,"7":1823,"8":23200,"9":1422}}]}</script>
+<script type="application/json" id="snapshot">{"builtAt":1794302167482,"people":[{"no":1,"name":"田中美海","x":"misskindai26_1","ig":"miss.kindai2026_no.1","tt":"misskindai2026_1"},{"no":2,"name":"白石ひより","x":"misskindai26_2","ig":"miss.kindai2026_no.2","tt":"misskindai2026_2"},{"no":3,"name":"三好愛美","x":"misskindai26_3","ig":"miss.kindai2026_no.3","tt":"misskindai2026_3"},{"no":4,"name":"鈴木凛々子","x":"misskindai26_4","ig":"miss.kindai2026_no.4","tt":"misskindai2026_4"},{"no":5,"name":"仲子和里","x":"misskindai26_5","ig":"miss.kindai2026_no.5","tt":"misskindai2026_5"},{"no":6,"name":"山口小巻","x":"misskindai26_6","ig":"miss.kindai2026_no.6","tt":"misskindai2026_6"},{"no":7,"name":"月城安菜","x":"misskindai26_7","ig":"miss.kindai2026_no.7","tt":"misskindai2026_7"},{"no":8,"name":"高賀音羽","x":"misskindai26_8","ig":"miss.kindai2026_no.8","tt":"misskindai2026_8"},{"no":9,"name":"松本七乃葉","x":"misskindai26_9","ig":"miss.kindai2026_no.9","tt":"misskindai2026_9"}],"samples":[{"t":1794287463549,"x":{"1":1102,"2":8639,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4616,"9":315},"ig":{"1":2355,"2":5417,"3":981,"4":955,"5":892,"6":2830,"7":748,"8":8022,"9":1184},"tt":{"1":8908,"2":8765,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}},{"t":1794288670143,"x":{"1":1102,"2":8657,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4617,"9":315},"ig":{"1":2355,"2":5429,"3":981,"4":955,"5":893,"6":2830,"7":748,"8":8024,"9":1184},"tt":{"2":8770,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}},{"t":1794292269459,"x":{"1":1102,"2":8701,"3":468,"4":765,"5":457,"6":6604,"7":362,"8":4618,"9":315},"ig":{"1":2356,"2":5441,"3":981,"4":955,"5":893,"6":2832,"7":748,"8":8029,"9":1184},"tt":{"2":8781,"3":2136,"4":11700,"5":1024,"6":6747,"7":1825,"8":23200,"9":1421}},{"t":1794295867314,"x":{"1":1102,"2":8744,"3":468,"4":765,"5":457,"6":6605,"7":361,"9":315},"ig":{"1":2355,"2":5453,"3":981,"4":955,"5":893,"6":2833,"7":747,"8":8032,"9":1183},"tt":{"2":8789,"3":2136,"4":11700,"5":1025,"6":6748,"7":1824,"8":23200,"9":1422}},{"t":1794301280902,"x":{"1":1102,"2":8782,"3":468,"4":764,"6":6605,"7":361,"8":4621},"ig":{"1":2356,"2":5467,"3":981,"4":955,"5":895,"6":2833,"7":747,"8":8037,"9":1184},"tt":{"2":8804,"3":2144,"4":11700,"5":1025,"6":6751,"7":1823,"8":23200,"9":1422}}]}</script>
 <script>
 (() => {
   const SNAP = (() => { try { return JSON.parse(document.getElementById("snapshot").textContent || "{}"); } catch (e) { return {}; } })();
@@ -360,11 +361,20 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
     if (!latest) { f.textContent = "まだ記録がありません"; return; }
     const age = Date.now() - latest.t;
     f.append(el("span", { class: "live", "aria-hidden": "true" }), el("span", {}, "最終更新 "), el("b", {}, fmtDT(latest.t)), el("span", {}, `（${ago(age)}）`));
+    // X is also read by GitHub while the Mac sleeps, so each SNS can be from a different time.
+    const lastGot = {};
+    PL.forEach((k) => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i].got[k]) { lastGot[k] = rows[i].t; break; } });
+    const L = parts(latest.t);
+    const hm = (t) => { const q = parts(t); return q.month === L.month && q.day === L.day ? `${q.hour}:${q.minute}` : `${q.month}/${q.day} ${q.hour}:${q.minute}`; };
+    f.append(el("span", { class: "fresh-pl" }, PL.map((k) => `${PNAME[k]} ${lastGot[k] ? hm(lastGot[k]) : "—"}`).join("・")));
     const st = $("stale");
-    const miss = PL.filter((k) => !latest.got[k]).map((k) => PNAME[k]);
+    const behind = PL.filter((k) => !lastGot[k] || latest.t - lastGot[k] > 90 * 6e4);
     const msgs = [];
     if (age > 3 * H) msgs.push(`最後の更新から${span(age)}たっています。運営側のパソコンが止まっている可能性があります。`);
-    if (miss.length) msgs.push(`前回の更新では${miss.join("・")}を読み取れなかったため、その前の数字を表示しています。`);
+    else if (behind.length) {
+      const since = Math.min(...behind.map((k) => lastGot[k] || latest.t));
+      msgs.push(`${behind.map((k) => PNAME[k]).join("・")}は、読み取り用のパソコンが止まっているため${fmtHM(since)}の数字のままです。${behind.includes("x") ? "" : "Xは毎時更新されています。"}`);
+    }
     st.hidden = !msgs.length;
     st.textContent = msgs.join(" ");
   }

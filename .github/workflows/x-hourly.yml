@@ -1,0 +1,32 @@
+# Keeps the X counts on the public page moving while the Mac (which also reads Instagram and TikTok) is asleep.
+# It skips itself when the Mac recorded X within the last 40 minutes.
+name: X hourly
+
+on:
+  schedule:
+    - cron: "50 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/x-hourly.yml", "tools/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-hourly
+  cancel-in-progress: false
+
+jobs:
+  x:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read X follower counts and update the page
+        env:
+          FORCE: ${{ github.event_name != 'schedule' && '1' || '' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 -I tools/sns.py auto-x

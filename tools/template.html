@@ -1,0 +1,723 @@
+<title>ひよりSNSメーター</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>
+/* Layout: one phone-width column. Hiyori's own card first (where she stands, how far to the next person),
+   then one filter row that scopes everything below it: growth ranking, trend, her daily gains, full table. */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --ink: #15171c;
+  --ink-2: #454a55;
+  --muted: #6b7180;
+  --line: #e3e5ea;
+  --grid: #eceef1;
+  --axis: #c9ccd3;
+  --chip: #e9ebef;
+  --hiyori: #e0612d;          /* her series: lines, bars, dots */
+  --hiyori-strong: #b8481d;   /* small filled badges carrying white text */
+  --hiyori-tint: #fff5df;     /* her card and her table row (fan name: ひよっこ) */
+  --hiyori-edge: #f7e2b5;
+  --others: #b8bcc6;          /* the other eight finalists, deliberately quiet */
+  --up: #0f7a3a;
+  --down: #c93636;
+  --warn-bg: #fff1d6;
+  --warn-ink: #7a4b00;
+  --f-ui: system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
+  --f-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", var(--f-ui);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111216; --surface: #1b1d22; --ink: #f1f2f4; --ink-2: #c5c8cf; --muted: #9aa0ad;
+    --line: #2b2e35; --grid: #24272d; --axis: #3a3e46; --chip: #262930;
+    --hiyori: #f07a3e; --hiyori-strong: #f07a3e; --hiyori-tint: #2a2115; --hiyori-edge: #3d2e18;
+    --others: #4c515c; --up: #3cc477; --down: #f06a6a; --warn-bg: #3a2c12; --warn-ink: #ffd27a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111216; --surface: #1b1d22; --ink: #f1f2f4; --ink-2: #c5c8cf; --muted: #9aa0ad;
+  --line: #2b2e35; --grid: #24272d; --axis: #3a3e46; --chip: #262930;
+  --hiyori: #f07a3e; --hiyori-strong: #f07a3e; --hiyori-tint: #2a2115; --hiyori-edge: #3d2e18;
+  --others: #4c515c; --up: #3cc477; --down: #f06a6a; --warn-bg: #3a2c12; --warn-ink: #ffd27a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.6; -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; display: flex; flex-direction: column; gap: 16px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--hiyori); outline-offset: 2px; }
+
+/* header */
+.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px 16px; flex-wrap: wrap; }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+h1 { margin: 0; font-family: var(--f-display); font-size: 24px; line-height: 1.3; text-wrap: balance; }
+.fresh { margin: 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.live { width: 8px; height: 8px; border-radius: 50%; background: var(--up); flex: none; }
+.fresh b { color: var(--ink-2); font-weight: 600; }
+.fresh-pl { flex-basis: 100%; }
+.stale { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 0; }
+
+/* Hiyori's card */
+.hero { background: var(--hiyori-tint); border: 1px solid var(--hiyori-edge); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.who { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.no { background: var(--hiyori-strong); color: #fff; font-weight: 700; font-size: 12px; padding: 2px 9px; border-radius: 999px; letter-spacing: .04em; }
+:root[data-theme="dark"] .no { color: #1b1d22; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .no { color: #1b1d22; } }
+.who h2 { margin: 0; font-family: var(--f-display); font-size: 22px; line-height: 1.2; }
+.fan { font-size: 12px; color: var(--ink-2); }
+.total { display: flex; flex-direction: column; gap: 2px; }
+.total-num { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.big { font-size: 52px; font-weight: 700; line-height: 1.05; letter-spacing: -.01em; }
+.unit { font-size: 16px; font-weight: 600; color: var(--ink-2); }
+.total-sub { margin: 0; font-size: 13px; color: var(--ink-2); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: baseline; gap: 2px; padding: 1px 10px; border-radius: 999px; background: var(--surface); color: var(--ink); font-weight: 700; font-size: 13px; }
+.pill b { font-size: 16px; }
+.deltas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.dchip { background: var(--surface); border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; min-width: 0; }
+.dchip .k { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.dchip .v { font-size: 17px; font-weight: 700; }
+.dchip .s { font-size: 11px; color: var(--muted); }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--muted); }
+.goal { background: var(--surface); border-radius: 12px; padding: 10px 12px; margin: 0; font-size: 14px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.goal .k { font-size: 11px; font-weight: 700; color: var(--hiyori-strong); letter-spacing: .06em; }
+:root[data-theme="dark"] .goal .k { color: var(--hiyori); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .goal .k { color: var(--hiyori); } }
+.plats { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.plat { background: var(--surface); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.plat-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tag { font-size: 12px; font-weight: 700; color: var(--ink-2); background: var(--chip); border-radius: 6px; padding: 1px 8px; }
+.rank { font-size: 13px; color: var(--ink-2); }
+.rank b { font-size: 20px; color: var(--ink); margin-right: 1px; }
+.plat-mid { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.plat-num { font-size: 26px; font-weight: 700; line-height: 1.2; }
+.plat-num small { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-left: 2px; }
+.plat-d { font-size: 13px; font-weight: 700; }
+.plat-d small { font-weight: 400; color: var(--muted); margin-left: 4px; }
+.gap { margin: 0; font-size: 13px; color: var(--ink-2); }
+.gap b { color: var(--ink); }
+.strip { display: block; width: 100%; height: 26px; overflow: visible; }
+
+/* filters */
+.filters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; background: var(--chip); border-radius: 999px; padding: 3px; gap: 2px; max-width: 100%; overflow-x: auto; }
+.seg button { border: 0; background: transparent; border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 700; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.seg.small button { padding: 3px 10px; font-size: 12px; }
+.filters .seg button { padding: 5px 9px; }
+
+/* cards */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.card h3 { margin: 0; font-size: 16px; line-height: 1.4; text-wrap: balance; }
+.sub { margin: 0; font-size: 12px; color: var(--muted); }
+.empty { margin: 0; padding: 18px 12px; border-radius: 10px; background: var(--bg); color: var(--ink-2); font-size: 13px; text-align: center; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.key { width: 16px; height: 2px; border-radius: 1px; background: var(--others); display: inline-block; }
+.key.me { background: var(--hiyori); height: 3px; }
+
+/* growth ranking */
+.grow { display: flex; flex-direction: column; gap: 4px; }
+.grow-row { display: grid; grid-template-columns: 1.2em minmax(0, 5.8em) minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 8px; font-size: 13px; }
+.grow-row.me { background: var(--hiyori-tint); font-weight: 700; }
+.g-rank { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.g-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-name small { color: var(--muted); font-weight: 400; margin-right: 4px; font-size: 11px; }
+.g-track { position: relative; height: 12px; }
+.g-zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--axis); }
+.g-bar { position: absolute; top: 0; bottom: 0; background: var(--others); min-width: 2px; }
+.g-bar.pos { border-radius: 0 4px 4px 0; }
+.g-bar.neg { border-radius: 4px 0 0 4px; }
+.me .g-bar { background: var(--hiyori); }
+.g-val { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.g-val small { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 11px; }
+
+/* svg charts */
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.chart:focus-visible { outline-offset: 4px; border-radius: 6px; }
+.ax text { fill: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+.ax line { stroke: var(--grid); stroke-width: 1; }
+.ax .base { stroke: var(--axis); }
+.endlabel { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.tip { position: absolute; top: 0; z-index: 3; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.14); padding: 8px 10px; font-size: 12px; min-width: 150px; }
+.tip-t { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+.tip-r { display: grid; grid-template-columns: 14px auto 1fr; gap: 6px; align-items: center; line-height: 1.5; }
+.tip-r b { font-variant-numeric: tabular-nums; text-align: right; }
+.tip-r span { color: var(--ink-2); white-space: nowrap; }
+.tip-r.me { font-weight: 700; } .tip-r.me span { color: var(--ink); }
+
+/* table */
+.table-wrap { overflow-x: auto; margin-inline: -16px; padding-inline: 16px; }
+table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 520px; font-size: 13px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; }
+th button { border: 0; background: none; padding: 2px 4px; border-radius: 6px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+th.sel button { color: var(--ink); text-decoration: underline; text-decoration-color: var(--hiyori); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+td.sel { background: color-mix(in srgb, var(--chip) 45%, transparent); }
+th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 1; }
+tr.me td { background: var(--hiyori-tint); font-weight: 700; }
+td .n { display: block; font-variant-numeric: tabular-nums; font-size: 14px; }
+td .d { display: block; font-size: 11px; font-variant-numeric: tabular-nums; }
+td .rk { display: inline-block; min-width: 1.4em; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-right: 4px; }
+
+.notes { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; padding-inline: 2px; }
+.notes p { margin: 0; }
+.notes a { color: var(--ink-2); }
+.links { display: flex; gap: 6px 12px; flex-wrap: wrap; }
+@media (min-width: 640px) {
+  .plats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .deltas { max-width: 420px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow">ミス近大2026 ファイナリスト9人のフォロワー</p>
+      <h1>ひよりSNSメーター</h1>
+    </div>
+    <p class="fresh" id="fresh"><span class="live" aria-hidden="true"></span>読み込み中</p>
+  </header>
+  <p class="stale" id="stale" hidden></p>
+
+  <section class="hero" id="hero" aria-labelledby="heroName">
+    <div class="who"><span class="no">No.2</span><h2 id="heroName">白石ひより</h2><span class="fan">ファンマ 👼🏻🏹</span></div>
+    <div class="total">
+      <div class="total-num"><span class="big" id="heroTotal">—</span><span class="unit">人</span></div>
+      <p class="total-sub">X・Instagram・TikTokの合計 <span class="pill" id="heroRank"></span></p>
+    </div>
+    <div class="deltas" id="heroDeltas"></div>
+    <p class="goal" id="goal" hidden></p>
+    <ul class="plats" id="plats"></ul>
+  </section>
+
+  <div class="filters" id="filters">
+    <div class="seg" role="group" aria-label="SNS" id="segP">
+      <button type="button" id="p-all" data-p="all">合計</button>
+      <button type="button" id="p-x" data-p="x">X</button>
+      <button type="button" id="p-ig" data-p="ig">Instagram</button>
+      <button type="button" id="p-tt" data-p="tt">TikTok</button>
+    </div>
+    <div class="seg" role="group" aria-label="期間" id="segR">
+      <button type="button" id="r-d" data-r="d">24時間</button>
+      <button type="button" id="r-w" data-r="w">7日間</button>
+    </div>
+  </div>
+
+  <section class="card" id="growth">
+    <div class="card-head">
+      <h3 id="growthTitle">増えた人数</h3>
+      <div class="seg small" role="group" aria-label="表示" id="segM">
+        <button type="button" id="m-n" data-m="n">人数</button>
+        <button type="button" id="m-pct" data-m="pct">伸び率</button>
+      </div>
+    </div>
+    <p class="sub" id="growthSub"></p>
+    <div class="grow" id="growList"></div>
+  </section>
+
+  <section class="card" id="trend">
+    <div class="card-head">
+      <h3 id="trendTitle">フォロワーの推移</h3>
+      <div class="seg small" role="group" aria-label="推移の表示" id="segV">
+        <button type="button" id="v-g" data-v="g">増えた数</button>
+        <button type="button" id="v-n" data-v="n">人数</button>
+      </div>
+    </div>
+    <div class="legend"><span><i class="key me"></i>白石ひより</span><span><i class="key"></i>ほかの8人</span></div>
+    <div class="chart" id="trendChart" tabindex="0" role="img" aria-label="フォロワーの推移"></div>
+    <p class="sub">グラフを触ると、その時点の全員の数字が出ます。</p>
+  </section>
+
+  <section class="card" id="daily">
+    <div class="card-head"><h3 id="dailyTitle">ひよりの1日ごとの増加</h3></div>
+    <div class="chart" id="dailyChart"></div>
+  </section>
+
+  <section class="card" id="all">
+    <div class="card-head"><h3>全員のフォロワー数</h3></div>
+    <p class="sub" id="tableSub"></p>
+    <div class="table-wrap">
+      <table id="tbl">
+        <thead><tr>
+          <th scope="col">順位・名前</th>
+          <th scope="col" data-p="x"><button type="button" id="th-x" data-p="x">X</button></th>
+          <th scope="col" data-p="ig"><button type="button" id="th-ig" data-p="ig">Instagram</button></th>
+          <th scope="col" data-p="tt"><button type="button" id="th-tt" data-p="tt">TikTok</button></th>
+          <th scope="col" data-p="all"><button type="button" id="th-all" data-p="all">合計</button></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <p>フォロワー数は、各SNSの公開プロフィールから自動で読み取っています。アカウントはエールボートの公式エントリー情報に載っているものです。</p>
+    <p>TikTokは1万人を超えると100人単位でしか表示されないため、「約」がついた数字は概数です。</p>
+    <p>前日比は約24時間前、週間比は約7日前の記録との差です。記録は約1時間ごとに更新されます。InstagramとTikTokは運営側のパソコンが起動している間だけ、XはGitHubのサーバーで常に更新されます。ページを開いたままでも、新しい記録が出ると自動で切り替わります。</p>
+    <p class="links" id="links"></p>
+  </footer>
+</div>
+
+<script type="application/json" id="snapshot">{}</script>
+<script>
+(() => {
+  const SNAP = (() => { try { return JSON.parse(document.getElementById("snapshot").textContent || "{}"); } catch (e) { return {}; } })();
+  const PEOPLE = SNAP.people || [];
+  const ME = 2;
+  const H = 36e5, D = 864e5, JST = 9 * H;
+  const PL = ["x", "ig", "tt"];
+  const PNAME = { all: "合計", x: "X", ig: "Instagram", tt: "TikTok" };
+  const RANGE = { d: { ms: D, label: "24時間", word: "前日比", tol: 4 * H }, w: { ms: 7 * D, label: "7日間", word: "週間比", tol: 14 * H } };
+  const $ = (id) => document.getElementById(id);
+  const byNo = Object.fromEntries(PEOPLE.map((p) => [p.no, p]));
+
+  const state = { p: "all", r: "d", m: "n", v: "g" };
+  try { Object.assign(state, JSON.parse(localStorage.getItem("hiyori-sns-ui") || "{}")); } catch (e) {}
+  const saveUI = () => { try { localStorage.setItem("hiyori-sns-ui", JSON.stringify(state)); } catch (e) {} };
+
+  // Carry each account's last known count forward, so a run that missed one SNS still has a full row.
+  const rows = (() => {
+    const cur = {};
+    PEOPLE.forEach((p) => (cur[p.no] = { x: null, ig: null, tt: null }));
+    return (SNAP.samples || []).map((s) => {
+      const v = {};
+      PEOPLE.forEach((per) => {
+        const c = cur[per.no];
+        PL.forEach((k) => { const n = s[k] && s[k][per.no]; if (typeof n === "number") c[k] = n; });
+        v[per.no] = { x: c.x, ig: c.ig, tt: c.tt, all: c.x != null && c.ig != null && c.tt != null ? c.x + c.ig + c.tt : null };
+      });
+      const got = {};
+      PL.forEach((k) => (got[k] = !!(s[k] && Object.keys(s[k]).length)));
+      return { t: s.t, v, got };
+    });
+  })();
+  const latest = rows[rows.length - 1];
+
+  // ---------- formatting ----------
+  const nf = new Intl.NumberFormat("ja-JP");
+  const fmt = (n) => (n == null ? "—" : nf.format(n));
+  const approx = (no, p) => latest && (p === "tt" || p === "all") && (latest.v[no].tt || 0) >= 10000;
+  const parts = (t) => Object.fromEntries(new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+  const fmtDT = (t) => { const q = parts(t); return `${q.month}/${q.day}(${q.weekday}) ${q.hour}:${q.minute}`; };
+  const fmtMD = (t) => { const q = parts(t); return `${q.month}/${q.day}`; };
+  const fmtHM = (t) => { const q = parts(t); return `${q.month}/${q.day} ${q.hour}:${q.minute}`; };
+  const ago = (ms) => (ms < 90e3 ? "たった今" : ms < H ? `${Math.round(ms / 6e4)}分前` : ms < D ? `${Math.round(ms / H)}時間前` : `${Math.round(ms / D)}日前`);
+  const span = (ms) => (ms < 1.5 * H ? `${Math.round(ms / 6e4)}分` : ms < 1.5 * D ? `${Math.round(ms / H)}時間` : `${Math.round(ms / D)}日`);
+  const signed = (d) => (d == null ? "—" : d > 0 ? `▲${nf.format(d)}` : d < 0 ? `▼${nf.format(-d)}` : "±0");
+  const cls = (d) => (d == null || d === 0 ? "flat" : d > 0 ? "up" : "down");
+  const pctTxt = (x) => (x == null || !isFinite(x) ? "" : `${x > 0 ? "+" : x < 0 ? "−" : "±"}${Math.abs(x).toFixed(Math.abs(x) < 10 ? 1 : 0)}%`);
+  const axisFmt = (v) => (Math.abs(v) >= 10000 ? `${+(v / 10000).toFixed(1)}万` : nf.format(v));
+  const el = (tag, attrs = {}, text) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (text != null) e.textContent = text; return e; };
+  const NS = "http://www.w3.org/2000/svg";
+  const sv = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (text != null) e.textContent = text; return e; };
+
+  // ---------- comparisons ----------
+  // The row to compare against: the last record at least `range` old. Too little history -> the first record, labelled as such.
+  function baseFor(r) {
+    if (!latest || rows.length < 2) return null;
+    const target = latest.t - RANGE[r].ms;
+    let base = null;
+    for (const row of rows) { if (row.t <= target + 5 * 6e4) base = row; else break; }
+    const exact = !!base && target - base.t <= RANGE[r].tol;
+    if (!base) base = rows[0];
+    return { row: base, exact, ms: latest.t - base.t };
+  }
+  const val = (row, no, p) => (row ? row.v[no][p] : null);
+  const delta = (base, no, p) => { const a = val(latest, no, p), b = val(base && base.row, no, p); return a == null || b == null ? null : a - b; };
+  const pctOf = (base, no, p) => { const d = delta(base, no, p), b = val(base && base.row, no, p); return d == null || !b ? null : (d / b) * 100; };
+  function ranking(p, row = latest) {
+    const list = PEOPLE.map((per) => ({ no: per.no, n: val(row, per.no, p) })).filter((x) => x.n != null).sort((a, b) => b.n - a.n);
+    list.forEach((x, i) => (x.rank = i > 0 && list[i - 1].n === x.n ? list[i - 1].rank : i + 1));
+    return list;
+  }
+  const baseLabel = (b, r) => (b.exact ? RANGE[r].word : `記録開始（${fmtHM(b.row.t)}）から${span(b.ms)}`);
+
+  // ---------- header ----------
+  function renderFresh() {
+    const f = $("fresh");
+    f.replaceChildren();
+    if (!latest) { f.textContent = "まだ記録がありません"; return; }
+    const age = Date.now() - latest.t;
+    f.append(el("span", { class: "live", "aria-hidden": "true" }), el("span", {}, "最終更新 "), el("b", {}, fmtDT(latest.t)), el("span", {}, `（${ago(age)}）`));
+    // X is also read by GitHub while the Mac sleeps, so each SNS can be from a different time.
+    const lastGot = {};
+    PL.forEach((k) => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i].got[k]) { lastGot[k] = rows[i].t; break; } });
+    const L = parts(latest.t);
+    const hm = (t) => { const q = parts(t); return q.month === L.month && q.day === L.day ? `${q.hour}:${q.minute}` : `${q.month}/${q.day} ${q.hour}:${q.minute}`; };
+    f.append(el("span", { class: "fresh-pl" }, PL.map((k) => `${PNAME[k]} ${lastGot[k] ? hm(lastGot[k]) : "—"}`).join("・")));
+    const st = $("stale");
+    const behind = PL.filter((k) => !lastGot[k] || latest.t - lastGot[k] > 90 * 6e4);
+    const msgs = [];
+    if (age > 3 * H) msgs.push(`最後の更新から${span(age)}たっています。運営側のパソコンが止まっている可能性があります。`);
+    else if (behind.length) {
+      const since = Math.min(...behind.map((k) => lastGot[k] || latest.t));
+      msgs.push(`${behind.map((k) => PNAME[k]).join("・")}は、読み取り用のパソコンが止まっているため${fmtHM(since)}の数字のままです。${behind.includes("x") ? "" : "Xは毎時更新されています。"}`);
+    }
+    st.hidden = !msgs.length;
+    st.textContent = msgs.join(" ");
+  }
+
+  // ---------- Hiyori's card ----------
+  function gapText(p) {
+    const list = ranking(p);
+    const i = list.findIndex((x) => x.no === ME);
+    if (i < 0) return null;
+    const me = list[i];
+    if (i === 0) {
+      const next = list[1];
+      return next ? { lead: true, rank: me.rank, other: next, diff: me.n - next.n } : { lead: true, rank: 1 };
+    }
+    const above = list[i - 1];
+    return { lead: false, rank: me.rank, other: above, diff: above.n - me.n };
+  }
+  function strip(p) {
+    const list = ranking(p);
+    const max = Math.max(...list.map((x) => x.n), 1);
+    const svg = sv("svg", { class: "strip", viewBox: "0 0 300 26", preserveAspectRatio: "none", role: "img", "aria-label": `${PNAME[p]}での位置：` + list.map((x) => `${byNo[x.no].name} ${fmt(x.n)}`).join("、") });
+    svg.append(sv("line", { x1: 0, x2: 300, y1: 13, y2: 13, stroke: "var(--axis)", "stroke-width": 1, "vector-effect": "non-scaling-stroke" }));
+    list.filter((x) => x.no !== ME).forEach((x) => svg.append(sv("circle", { cx: 4 + (x.n / max) * 292, cy: 13, r: 3.5, fill: "var(--others)", stroke: "var(--surface)", "stroke-width": 1.5 })));
+    const me = list.find((x) => x.no === ME);
+    if (me) svg.append(sv("circle", { cx: 4 + (me.n / max) * 292, cy: 13, r: 6, fill: "var(--hiyori)", stroke: "var(--surface)", "stroke-width": 2 }));
+    return svg;
+  }
+  function renderHero() {
+    if (!latest) return;
+    const tot = latest.v[ME].all;
+    $("heroTotal").textContent = (approx(ME, "all") ? "約" : "") + fmt(tot);
+    const g = gapText("all");
+    const pill = $("heroRank");
+    pill.replaceChildren(el("span", {}, "9人中 "), el("b", {}, g ? String(g.rank) : "—"), el("span", {}, "位"));
+
+    const box = $("heroDeltas");
+    box.replaceChildren();
+    for (const r of ["d", "w"]) {
+      const b = baseFor(r);
+      const chip = el("div", { class: "dchip" });
+      chip.append(el("span", { class: "k" }, RANGE[r].word));
+      if (b && b.exact) {
+        const d = delta(b, ME, "all");
+        chip.append(el("span", { class: "v " + cls(d) }, signed(d)), el("span", { class: "s" }, `${pctTxt(pctOf(b, ME, "all"))}・伸び${growthRankOf(b, "all")}位/9人`));
+      } else {
+        const ready = rows.length ? rows[0].t + RANGE[r].ms : null;
+        chip.append(el("span", { class: "v flat" }, "—"), el("span", { class: "s" }, ready ? `${fmtHM(ready)}ごろから表示` : "記録がたまると表示"));
+      }
+      box.append(chip);
+    }
+
+    // The nearest person she can overtake, on whichever SNS is closest.
+    const goals = PL.map((p) => ({ p, g: gapText(p) })).filter((x) => x.g && !x.g.lead).sort((a, b) => a.g.diff - b.g.diff);
+    const goal = $("goal");
+    goal.replaceChildren(el("span", { class: "k" }, "次の目標"));
+    if (goals.length) {
+      const { p, g: gg } = goals[0];
+      goal.append(el("span", {}, `${PNAME[p]}で${gg.rank - 1}位の${byNo[gg.other.no].name}さんを抜く　`), el("b", {}, `あと${fmt(gg.diff)}人`));
+    } else {
+      goal.append(el("span", {}, "X・Instagram・TikTokの3つすべてで1位です"));
+    }
+    goal.hidden = false;
+
+    const ul = $("plats");
+    ul.replaceChildren();
+    const bd = baseFor("d");
+    for (const p of PL) {
+      const g = gapText(p);
+      const li = el("li", { class: "plat" });
+      const top = el("div", { class: "plat-top" });
+      const rk = el("span", { class: "rank" });
+      rk.append(el("b", {}, g ? String(g.rank) : "—"), document.createTextNode("位 / 9人"));
+      top.append(el("span", { class: "tag" }, PNAME[p]), rk);
+      const mid = el("div", { class: "plat-mid" });
+      const num = el("span", { class: "plat-num" }, (approx(ME, p) ? "約" : "") + fmt(val(latest, ME, p)));
+      num.append(el("small", {}, "人"));
+      mid.append(num);
+      if (bd && bd.exact) {
+        const d = delta(bd, ME, p);
+        const dd = el("span", { class: "plat-d " + cls(d) }, signed(d));
+        dd.append(el("small", {}, "前日比"));
+        mid.append(dd);
+      }
+      const gp = el("p", { class: "gap" });
+      if (g && g.other) {
+        const who = byNo[g.other.no].name;
+        if (g.lead) gp.append(document.createTextNode(`2位の${who}さんに `), el("b", {}, `${fmt(g.diff)}人差`), document.createTextNode(" でリード"));
+        else gp.append(document.createTextNode(`${g.rank - 1}位の${who}さんまで `), el("b", {}, `あと${fmt(g.diff)}人`));
+      }
+      li.append(top, mid, gp, strip(p));
+      ul.append(li);
+    }
+  }
+  function growthRankOf(b, p) {
+    const list = PEOPLE.map((per) => ({ no: per.no, d: delta(b, per.no, p) })).filter((x) => x.d != null).sort((a, z) => z.d - a.d);
+    const i = list.findIndex((x) => x.no === ME);
+    return i < 0 ? "—" : i + 1;
+  }
+
+  // ---------- growth ranking ----------
+  function renderGrowth() {
+    const p = state.p, r = state.r, b = baseFor(r);
+    $("growthTitle").textContent = `${RANGE[r].label}で${state.m === "n" ? "増えた人数" : "伸びた割合"}（${PNAME[p]}）`;
+    const list = $("growList");
+    list.replaceChildren();
+    if (!b) {
+      $("growthSub").textContent = "";
+      list.append(el("p", { class: "empty" }, "比べられる記録がまだありません。次の更新（約1時間後）から、増えた人数のランキングが出ます。"));
+      return;
+    }
+    $("growthSub").textContent = b.exact ? `${fmtHM(b.row.t)} → ${fmtHM(latest.t)} の増加` : `記録が${RANGE[r].label}分たまるまでは、記録開始（${fmtHM(b.row.t)}）からの${span(b.ms)}の増加を出しています。`;
+    const items = PEOPLE.map((per) => ({ per, d: delta(b, per.no, p), pct: pctOf(b, per.no, p) })).filter((x) => x.d != null);
+    const key = state.m === "n" ? "d" : "pct";
+    items.sort((a, z) => (z[key] ?? -Infinity) - (a[key] ?? -Infinity));
+    const vals = items.map((x) => x[key] ?? 0);
+    let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+    if (lo === hi) hi = 1;
+    const pos = (v) => ((v - lo) / (hi - lo)) * 100;
+    items.forEach((x, i) => {
+      const v = x[key] ?? 0;
+      const row = el("div", { class: "grow-row" + (x.per.no === ME ? " me" : "") });
+      const name = el("span", { class: "g-name" });
+      name.textContent = x.per.name;
+      const track = el("span", { class: "g-track" });
+      const z = pos(0), e = pos(v);
+      track.append(el("span", { class: "g-zero", style: `left:${z}%` }));
+      if (v !== 0) track.append(el("span", { class: "g-bar " + (v > 0 ? "pos" : "neg"), style: `left:${Math.min(z, e)}%;width:${Math.abs(e - z)}%` }));
+      const out = el("span", { class: "g-val" }, state.m === "n" ? (x.d > 0 ? "+" : "") + fmt(x.d) : pctTxt(x.pct) || "—");
+      out.append(el("small", {}, state.m === "n" ? pctTxt(x.pct) : (x.d > 0 ? "+" : "") + fmt(x.d) + "人"));
+      row.append(el("span", { class: "g-rank" }, String(i + 1)), name, track, out);
+      list.append(row);
+    });
+  }
+
+  // ---------- trend chart ----------
+  function niceTicks(min, max, count) {
+    if (min === max) { min -= 1; max += 1; }
+    const raw = (max - min) / count, mag = 10 ** Math.floor(Math.log10(raw)), f = raw / mag;
+    const step = Math.max(1, (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * mag);
+    const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, ticks = [];
+    for (let v = lo; v <= hi + step / 2; v += step) ticks.push(Math.round(v));
+    return { lo, hi, ticks };
+  }
+  function timeTicks(t0, t1) {
+    const spanMs = t1 - t0, out = [];
+    if (spanMs <= 2 * D) {
+      const step = spanMs <= 12 * H ? 3 * H : 6 * H;
+      for (let t = Math.ceil((t0 + JST) / step) * step - JST; t <= t1; t += step) out.push({ t, label: `${parts(t).hour.replace(/^0/, "")}時` });
+    } else {
+      const every = spanMs > 10 * D ? 2 : 1;
+      let i = 0;
+      for (let t = Math.ceil((t0 + JST) / D) * D - JST; t <= t1; t += D, i++) if (i % every === 0) out.push({ t, label: fmtMD(t) });
+    }
+    return out;
+  }
+  let trendHover = null;
+  function renderTrend() {
+    const box = $("trendChart");
+    const p = state.p, r = state.r;
+    $("trendTitle").textContent = `フォロワーの推移（${PNAME[p]}・${RANGE[r].label}）`;
+    box.replaceChildren();
+    let rs = rows.filter((row) => row.t >= latest.t - RANGE[r].ms - 5 * 6e4);
+    if (rs.length < 2) rs = rows;
+    if (rs.length < 2) { box.append(el("p", { class: "empty" }, "推移の線は、2回目の更新から描かれます。")); return; }
+    const W = Math.max(280, box.clientWidth || 320), Ht = 230, m = { l: 46, r: 64, t: 12, b: 24 };
+    const first = {};
+    PEOPLE.forEach((per) => (first[per.no] = (rs.find((row) => row.v[per.no][p] != null) || {}).v?.[per.no][p] ?? null));
+    const yOf = (row, no) => { const v = row.v[no][p]; return v == null ? null : state.v === "g" ? (first[no] == null ? null : v - first[no]) : v; };
+    let ymin = Infinity, ymax = -Infinity;
+    rs.forEach((row) => PEOPLE.forEach((per) => { const y = yOf(row, per.no); if (y != null) { ymin = Math.min(ymin, y); ymax = Math.max(ymax, y); } }));
+    if (state.v === "g") { ymin = Math.min(0, ymin); ymax = Math.max(0, ymax); }
+    const yt = niceTicks(ymin, ymax, 4);
+    const t0 = rs[0].t, t1 = rs[rs.length - 1].t;
+    const X = (t) => m.l + ((t - t0) / Math.max(1, t1 - t0)) * (W - m.l - m.r);
+    const Y = (v) => m.t + (1 - (v - yt.lo) / Math.max(1, yt.hi - yt.lo)) * (Ht - m.t - m.b);
+    const svg = sv("svg", { viewBox: `0 0 ${W} ${Ht}`, height: Ht });
+    const ax = sv("g", { class: "ax" });
+    yt.ticks.forEach((v) => {
+      ax.append(sv("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: v === 0 && state.v === "g" ? "base" : "" }));
+      ax.append(sv("text", { x: m.l - 6, y: Y(v) + 3, "text-anchor": "end" }, (state.v === "g" && v > 0 ? "+" : "") + axisFmt(v)));
+    });
+    timeTicks(t0, t1).forEach((tk) => ax.append(sv("text", { x: X(tk.t), y: Ht - 6, "text-anchor": "middle" }, tk.label)));
+    svg.append(ax);
+    const path = (no) => {
+      let d = "", pen = false;
+      rs.forEach((row) => { const y = yOf(row, no); if (y == null) { pen = false; return; } d += `${pen ? "L" : "M"}${X(row.t).toFixed(1)},${Y(y).toFixed(1)}`; pen = true; });
+      return d;
+    };
+    PEOPLE.filter((per) => per.no !== ME).forEach((per) => svg.append(sv("path", { d: path(per.no), fill: "none", stroke: "var(--others)", "stroke-width": 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" })));
+    svg.append(sv("path", { d: path(ME), fill: "none", stroke: "var(--hiyori)", "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    const lastY = yOf(rs[rs.length - 1], ME);
+    if (lastY != null) {
+      svg.append(sv("circle", { cx: X(t1), cy: Y(lastY), r: 4.5, fill: "var(--hiyori)", stroke: "var(--surface)", "stroke-width": 2 }));
+      svg.append(sv("text", { class: "endlabel", x: X(t1) + 8, y: Y(lastY) + 4 }, (state.v === "g" && lastY > 0 ? "+" : "") + fmt(lastY)));
+    }
+    const cross = sv("line", { y1: m.t, y2: Ht - m.b, stroke: "var(--axis)", "stroke-width": 1, visibility: "hidden" });
+    const hot = sv("circle", { r: 4.5, fill: "var(--hiyori)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" });
+    svg.append(cross, hot);
+    const hit = sv("rect", { x: m.l, y: 0, width: W - m.l - m.r, height: Ht, fill: "transparent" });
+    svg.append(hit);
+    box.append(svg);
+    const tip = el("div", { class: "tip", hidden: "" });
+    box.append(tip);
+
+    const show = (i) => {
+      i = Math.max(0, Math.min(rs.length - 1, i));
+      trendHover = i;
+      const row = rs[i], x = X(row.t);
+      cross.setAttribute("x1", x); cross.setAttribute("x2", x); cross.setAttribute("visibility", "visible");
+      const my = yOf(row, ME);
+      if (my != null) { hot.setAttribute("cx", x); hot.setAttribute("cy", Y(my)); hot.setAttribute("visibility", "visible"); }
+      tip.replaceChildren(el("div", { class: "tip-t" }, fmtDT(row.t) + (state.v === "g" ? `　${fmtHM(t0)}からの増加` : "")));
+      PEOPLE.map((per) => ({ per, y: yOf(row, per.no) })).filter((q) => q.y != null).sort((a, z) => z.y - a.y).forEach((q) => {
+        const line = el("div", { class: "tip-r" + (q.per.no === ME ? " me" : "") });
+        line.append(el("i", { class: "key" + (q.per.no === ME ? " me" : "") }), el("b", {}, (state.v === "g" && q.y > 0 ? "+" : "") + fmt(q.y)), el("span", {}, q.per.name));
+        tip.append(line);
+      });
+      tip.hidden = false;
+      const tw = tip.offsetWidth;
+      tip.style.left = (x + 12 + tw > W ? Math.max(0, x - 12 - tw) : x + 12) + "px";
+    };
+    const hide = () => { trendHover = null; tip.hidden = true; cross.setAttribute("visibility", "hidden"); hot.setAttribute("visibility", "hidden"); };
+    const nearest = (evt) => {
+      const rect = svg.getBoundingClientRect();
+      const x = ((evt.clientX - rect.left) / rect.width) * W;
+      let best = 0;
+      rs.forEach((row, i) => { if (Math.abs(X(row.t) - x) < Math.abs(X(rs[best].t) - x)) best = i; });
+      return best;
+    };
+    hit.addEventListener("pointermove", (e) => show(nearest(e)));
+    hit.addEventListener("pointerdown", (e) => show(nearest(e)));
+    hit.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") hide(); });
+    box.onkeydown = (e) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); show((trendHover ?? rs.length) + (e.key === "ArrowLeft" ? -1 : 1)); }
+      else if (e.key === "Escape") hide();
+    };
+    box.onblur = hide;
+    box.setAttribute("aria-label", `${PNAME[p]}の推移。白石ひより ${fmt(lastY)}。左右キーで時点を選べます。`);
+  }
+
+  // ---------- Hiyori's daily gains ----------
+  function renderDaily() {
+    const box = $("dailyChart"), p = state.p;
+    $("dailyTitle").textContent = `ひよりの1日ごとの増加（${PNAME[p]}）`;
+    box.replaceChildren();
+    const ends = new Map();
+    rows.forEach((row) => ends.set(Math.floor((row.t + JST) / D), row));
+    const days = [...ends.entries()].sort((a, b) => a[0] - b[0]);
+    const bars = [];
+    for (let i = 1; i < days.length; i++) {
+      const a = days[i - 1][1].v[ME][p], b = days[i][1].v[ME][p];
+      if (a != null && b != null) bars.push({ day: days[i][0], row: days[i][1], d: b - a, today: i === days.length - 1 && Math.floor((Date.now() + JST) / D) === days[i][0] });
+    }
+    const shown = bars.slice(-14);
+    if (!shown.length) {
+      const next = rows.length ? fmtMD((Math.floor((rows[0].t + JST) / D) + 1) * D - JST) : "";
+      box.append(el("p", { class: "empty" }, `1日ごとの増加は、2日分の記録がたまると表示されます${next ? `（${next}から）` : ""}。`));
+      return;
+    }
+    const W = Math.max(280, box.clientWidth || 320), Ht = 170, m = { l: 40, r: 8, t: 20, b: 24 };
+    const yt = niceTicks(Math.min(0, ...shown.map((x) => x.d)), Math.max(1, ...shown.map((x) => x.d)), 3);
+    const band = (W - m.l - m.r) / shown.length, bw = Math.min(24, band * 0.62);
+    const Y = (v) => m.t + (1 - (v - yt.lo) / Math.max(1, yt.hi - yt.lo)) * (Ht - m.t - m.b);
+    const svg = sv("svg", { viewBox: `0 0 ${W} ${Ht}`, height: Ht, role: "img", "aria-label": "1日ごとの増加：" + shown.map((x) => `${fmtMD(x.day * D - JST + H)} ${signed(x.d)}`).join("、") });
+    const ax = sv("g", { class: "ax" });
+    yt.ticks.forEach((v) => {
+      ax.append(sv("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: v === 0 ? "base" : "" }));
+      ax.append(sv("text", { x: m.l - 6, y: Y(v) + 3, "text-anchor": "end" }, axisFmt(v)));
+    });
+    svg.append(ax);
+    const maxI = shown.reduce((bi, x, i) => (x.d > shown[bi].d ? i : bi), 0);
+    const every = Math.ceil(shown.length / 7);
+    shown.forEach((x, i) => {
+      const cx = m.l + band * i + band / 2, y0 = Y(0), y1 = Y(x.d), h = Math.abs(y1 - y0);
+      const top = Math.min(y0, y1), rr = Math.min(4, h);
+      const g = sv("g");
+      if (h > 0) {
+        // rounded at the data end, square at the baseline
+        const d = x.d >= 0
+          ? `M${cx - bw / 2},${y0}V${top + rr}Q${cx - bw / 2},${top} ${cx - bw / 2 + rr},${top}H${cx + bw / 2 - rr}Q${cx + bw / 2},${top} ${cx + bw / 2},${top + rr}V${y0}Z`
+          : `M${cx - bw / 2},${y0}V${top + h - rr}Q${cx - bw / 2},${top + h} ${cx - bw / 2 + rr},${top + h}H${cx + bw / 2 - rr}Q${cx + bw / 2},${top + h} ${cx + bw / 2},${top + h - rr}V${y0}Z`;
+        g.append(sv("path", { d, fill: "var(--hiyori)", opacity: x.today ? 0.55 : 1 }));
+      }
+      g.append(sv("title", {}, `${fmtMD(x.day * D - JST + H)}${x.today ? "（今日・途中）" : ""} ${signed(x.d)}人`));
+      if (i === maxI || i === shown.length - 1) g.append(sv("text", { class: "endlabel", x: cx, y: (x.d >= 0 ? y1 - 5 : y1 + 13), "text-anchor": "middle", "font-size": 11 }, signed(x.d)));
+      if (i % every === 0 || i === shown.length - 1) ax.append(sv("text", { x: cx, y: Ht - 6, "text-anchor": "middle" }, x.today ? "今日" : fmtMD(x.day * D - JST + H)));
+      svg.append(g);
+    });
+    box.append(svg);
+  }
+
+  // ---------- table ----------
+  function renderTable() {
+    const p = state.p, b = baseFor(state.r);
+    $("tableSub").textContent = b ? `小さい数字は${baseLabel(b, state.r)}の増減。見出しを押すと並び替えます。` : "見出しを押すと並び替えます。";
+    document.querySelectorAll("#tbl th[data-p]").forEach((th) => { th.classList.toggle("sel", th.dataset.p === p); th.setAttribute("aria-sort", th.dataset.p === p ? "descending" : "none"); });
+    const list = ranking(p);
+    const order = [...list.map((x) => x.no), ...PEOPLE.map((x) => x.no).filter((no) => !list.some((x) => x.no === no))];
+    const tb = $("tbody");
+    tb.replaceChildren();
+    order.forEach((no) => {
+      const per = byNo[no], tr = el("tr", { class: no === ME ? "me" : "" });
+      const first = el("td");
+      const r = list.find((x) => x.no === no);
+      first.append(el("span", { class: "rk" }, r ? String(r.rank) : "—"));
+      const nm = el("span", { class: "nm" });
+      nm.append(el("small", {}, `No.${no}`), document.createTextNode(per.name));
+      first.append(nm);
+      tr.append(first);
+      for (const k of ["x", "ig", "tt", "all"]) {
+        const td = el("td", { class: k === p ? "sel" : "" });
+        td.append(el("span", { class: "n" }, (approx(no, k) ? "約" : "") + fmt(val(latest, no, k))));
+        const d = b ? delta(b, no, k) : null;
+        td.append(el("span", { class: "d " + cls(d) }, b ? signed(d) : ""));
+        tr.append(td);
+      }
+      tb.append(tr);
+    });
+  }
+
+  function renderLinks() {
+    const box = $("links"), me = byNo[ME];
+    if (!me) return;
+    box.replaceChildren(el("span", {}, "ひよりのアカウント："));
+    [["X", `https://x.com/${me.x}`], ["Instagram", `https://www.instagram.com/${me.ig}/`], ["TikTok", `https://www.tiktok.com/@${me.tt}`]].forEach(([t, href]) => box.append(el("a", { href, target: "_blank", rel: "noopener" }, t)));
+  }
+
+  function syncButtons() {
+    document.querySelectorAll("[data-p]").forEach((b) => b.tagName === "BUTTON" && b.closest(".seg") && b.setAttribute("aria-pressed", String(b.dataset.p === state.p)));
+    document.querySelectorAll("[data-r]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.r === state.r)));
+    document.querySelectorAll("[data-m]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.m === state.m)));
+    document.querySelectorAll("[data-v]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === state.v)));
+  }
+  function renderFiltered() { syncButtons(); renderGrowth(); if (latest) { renderTrend(); renderDaily(); renderTable(); } }
+  function renderAll() {
+    renderFresh();
+    if (!latest) { $("growList").replaceChildren(el("p", { class: "empty" }, "まだ記録がありません。最初の更新が終わるとここに表示されます。")); syncButtons(); return; }
+    renderHero(); renderLinks(); renderFiltered();
+  }
+
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const d = b.dataset;
+    if (d.p) state.p = d.p; else if (d.r) state.r = d.r; else if (d.m) state.m = d.m; else if (d.v) state.v = d.v; else return;
+    saveUI();
+    renderFiltered();
+  });
+  let rz;
+  if ("ResizeObserver" in window) {
+    let lastW = 0;
+    new ResizeObserver((ents) => { const w = Math.round(ents[0].contentRect.width); if (w === lastW) return; lastW = w; clearTimeout(rz); rz = setTimeout(() => { if (latest) { renderTrend(); renderDaily(); } }, 120); }).observe($("trend"));
+  }
+  setInterval(renderFresh, 60e3);
+  renderAll();
+})();
+</script>
