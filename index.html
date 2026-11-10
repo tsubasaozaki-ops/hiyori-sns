@@ -274,12 +274,12 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
   <footer class="notes">
     <p>フォロワー数は、各SNSの公開プロフィールから自動で読み取っています。アカウントはエールボートの公式エントリー情報に載っているものです。</p>
     <p>TikTokは1万人を超えると100人単位でしか表示されないため、「約」がついた数字は概数です。</p>
-    <p>前日比は約24時間前、週間比は約7日前の記録との差です。記録は運営側のパソコンが起動している間、約1時間ごとに更新されます。</p>
+    <p>前日比は約24時間前、週間比は約7日前の記録との差です。記録は運営側のパソコンが起動している間、約1時間ごとに更新されます。ページを開いたままでも、新しい記録が出ると自動で切り替わります。</p>
     <p class="links" id="links"></p>
   </footer>
 </div>
 
-<script type="application/json" id="snapshot">{"builtAt":1794288902781,"people":[{"no":1,"name":"田中美海","x":"misskindai26_1","ig":"miss.kindai2026_no.1","tt":"misskindai2026_1"},{"no":2,"name":"白石ひより","x":"misskindai26_2","ig":"miss.kindai2026_no.2","tt":"misskindai2026_2"},{"no":3,"name":"三好愛美","x":"misskindai26_3","ig":"miss.kindai2026_no.3","tt":"misskindai2026_3"},{"no":4,"name":"鈴木凛々子","x":"misskindai26_4","ig":"miss.kindai2026_no.4","tt":"misskindai2026_4"},{"no":5,"name":"仲子和里","x":"misskindai26_5","ig":"miss.kindai2026_no.5","tt":"misskindai2026_5"},{"no":6,"name":"山口小巻","x":"misskindai26_6","ig":"miss.kindai2026_no.6","tt":"misskindai2026_6"},{"no":7,"name":"月城安菜","x":"misskindai26_7","ig":"miss.kindai2026_no.7","tt":"misskindai2026_7"},{"no":8,"name":"高賀音羽","x":"misskindai26_8","ig":"miss.kindai2026_no.8","tt":"misskindai2026_8"},{"no":9,"name":"松本七乃葉","x":"misskindai26_9","ig":"miss.kindai2026_no.9","tt":"misskindai2026_9"}],"samples":[{"t":1794287463549,"x":{"1":1102,"2":8639,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4616,"9":315},"ig":{"1":2355,"2":5417,"3":981,"4":955,"5":892,"6":2830,"7":748,"8":8022,"9":1184},"tt":{"1":8908,"2":8765,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}},{"t":1794288670143,"x":{"1":1102,"2":8657,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4617,"9":315},"ig":{"1":2355,"2":5429,"3":981,"4":955,"5":893,"6":2830,"7":748,"8":8024,"9":1184},"tt":{"2":8770,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}}]}</script>
+<script type="application/json" id="snapshot">{"builtAt":1794290425107,"people":[{"no":1,"name":"田中美海","x":"misskindai26_1","ig":"miss.kindai2026_no.1","tt":"misskindai2026_1"},{"no":2,"name":"白石ひより","x":"misskindai26_2","ig":"miss.kindai2026_no.2","tt":"misskindai2026_2"},{"no":3,"name":"三好愛美","x":"misskindai26_3","ig":"miss.kindai2026_no.3","tt":"misskindai2026_3"},{"no":4,"name":"鈴木凛々子","x":"misskindai26_4","ig":"miss.kindai2026_no.4","tt":"misskindai2026_4"},{"no":5,"name":"仲子和里","x":"misskindai26_5","ig":"miss.kindai2026_no.5","tt":"misskindai2026_5"},{"no":6,"name":"山口小巻","x":"misskindai26_6","ig":"miss.kindai2026_no.6","tt":"misskindai2026_6"},{"no":7,"name":"月城安菜","x":"misskindai26_7","ig":"miss.kindai2026_no.7","tt":"misskindai2026_7"},{"no":8,"name":"高賀音羽","x":"misskindai26_8","ig":"miss.kindai2026_no.8","tt":"misskindai2026_8"},{"no":9,"name":"松本七乃葉","x":"misskindai26_9","ig":"miss.kindai2026_no.9","tt":"misskindai2026_9"}],"samples":[{"t":1794287463549,"x":{"1":1102,"2":8639,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4616,"9":315},"ig":{"1":2355,"2":5417,"3":981,"4":955,"5":892,"6":2830,"7":748,"8":8022,"9":1184},"tt":{"1":8908,"2":8765,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}},{"t":1794288670143,"x":{"1":1102,"2":8657,"3":468,"4":765,"5":457,"6":6602,"7":362,"8":4617,"9":315},"ig":{"1":2355,"2":5429,"3":981,"4":955,"5":893,"6":2830,"7":748,"8":8024,"9":1184},"tt":{"2":8770,"3":2135,"4":11700,"5":1023,"6":6746,"7":1824,"8":23200,"9":1420}}]}</script>
 <script>
 (() => {
   const SNAP = (() => { try { return JSON.parse(document.getElementById("snapshot").textContent || "{}"); } catch (e) { return {}; } })();
@@ -720,6 +720,28 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
   }
   setInterval(renderFresh, 60e3);
   renderAll();
+})();
+</script>
+<script>
+(() => {
+  const built = (() => { try { return JSON.parse(document.getElementById("snapshot").textContent).builtAt || 0; } catch (e) { return 0; } })();
+  try { const y = sessionStorage.getItem("hiyori-sns-y"); if (y) { sessionStorage.removeItem("hiyori-sns-y"); addEventListener("load", () => scrollTo(0, +y)); } } catch (e) {}
+  let busy = false;
+  async function check() {
+    if (busy || document.hidden) return;
+    busy = true;
+    try {
+      const r = await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" });
+      const m = r.ok && (await r.text()).match(/"builtAt":(\d+)/);
+      if (m && +m[1] > built) {
+        try { sessionStorage.setItem("hiyori-sns-y", String(scrollY)); } catch (e) {}
+        location.replace(location.pathname + "?v=" + m[1]);
+      }
+    } catch (e) {}
+    busy = false;
+  }
+  setInterval(check, 5 * 60e3);
+  document.addEventListener("visibilitychange", check);
 })();
 </script>
 </body>
