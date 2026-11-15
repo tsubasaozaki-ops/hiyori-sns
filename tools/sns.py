@@ -166,7 +166,7 @@ def build(hist):
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             '<meta name="robots" content="noindex">\n'
             '<meta property="og:title" content="ひよりSNSメーター">\n'
-            '<meta property="og:description" content="ミス近大2026ファイナリスト9人のX・Instagram・TikTokフォロワー数（約1時間ごとに更新）">\n'
+            '<meta property="og:description" content="ミス近大2026ファイナリスト9人のX・Instagram・TikTokフォロワー数（Xは約1時間ごと、Instagram・TikTokは約4時間ごとに更新）">\n'
             '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}'
             'body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>\n'
             + head + '</head>\n<body>\n<div class="wrap">' + body + AUTO_RELOAD + '</body>\n</html>\n')
