@@ -264,7 +264,7 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
   <footer class="notes">
     <p>フォロワー数は、各SNSの公開プロフィールから自動で読み取っています。アカウントはエールボートの公式エントリー情報に載っているものです。</p>
     <p>TikTokは1万人を超えると100人単位でしか表示されないため、「約」がついた数字は概数です。</p>
-    <p>前日比は約24時間前、週間比は約7日前の記録との差です。XはGitHubのサーバーで約1時間ごとに、InstagramとTikTokは運営側のパソコンで約4時間ごとに更新されます。ページを開いたままでも、新しい記録が出ると自動で切り替わります。</p>
+    <p>前日比は約24時間前、週間比は約7日前の記録との差です。XはGitHubのサーバーで約1時間ごとに、InstagramとTikTokは運営側のパソコンで1日5回（0時・9時・12時・18時・22時ごろ）更新されます。ページを開いたままでも、新しい記録が出ると自動で切り替わります。</p>
     <p class="links" id="links"></p>
   </footer>
 </div>
@@ -357,7 +357,7 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
     const hm = (t) => { const q = parts(t); return q.month === L.month && q.day === L.day ? `${q.hour}:${q.minute}` : `${q.month}/${q.day} ${q.hour}:${q.minute}`; };
     f.append(el("span", { class: "fresh-pl" }, PL.map((k) => `${PNAME[k]} ${lastGot[k] ? hm(lastGot[k]) : "—"}`).join("・")));
     const st = $("stale");
-    const behind = PL.filter((k) => !lastGot[k] || latest.t - lastGot[k] > 4.5 * H);
+    const behind = PL.filter((k) => !lastGot[k] || latest.t - lastGot[k] > 9.5 * H);
     const msgs = [];
     if (age > 3 * H) msgs.push(`最後の更新から${span(age)}たっています。運営側のパソコンが止まっている可能性があります。`);
     else if (behind.length) {
