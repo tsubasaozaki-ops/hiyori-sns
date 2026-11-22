@@ -22,6 +22,8 @@ UA = {"User-Agent": "Mozilla/5.0 (compatible; hiyori-sns/1.1)"}
 JST = 9 * 3600
 # The Mac records everything at about :30. GitHub's run at about :50 only steps in when the newest X count is older than this.
 MAC_FRESH_MS = 40 * 60e3
+# Voting closed at 2026-11-22 23:59 JST; nothing is recorded after that.
+END_MS = 1795359599000
 
 PEOPLE = [
     {"no": n, "name": name, "x": f"misskindai26_{n}", "ig": f"miss.kindai2026_no.{n}", "tt": f"misskindai2026_{n}"}
@@ -125,6 +127,9 @@ def plausible(new, old):
 
 
 def record(args):
+    if now_ms() > END_MS:
+        print("nothing to record (集計終了)")
+        return False
     hist = sync(load_history())
     last = last_values(hist["samples"])
     now = now_ms()
@@ -222,6 +227,9 @@ def push():
 
 
 def auto_x():
+    if now_ms() > END_MS:
+        print("skip: 集計終了")
+        return
     """GitHub Actions: keep X moving while the Mac sleeps. Never fails the workflow over a flaky read."""
     newest_x = max((s["t"] for s in load_history()["samples"] if s.get("x")), default=0)
     age = now_ms() - newest_x

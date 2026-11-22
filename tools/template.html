@@ -359,6 +359,8 @@ td .nm small { color: var(--muted); font-weight: 400; font-size: 11px; margin-ri
     const st = $("stale");
     const behind = PL.filter((k) => !lastGot[k] || latest.t - lastGot[k] > 9.5 * H);
     const msgs = [];
+    const END = 1795359599000;
+    if (Date.now() > END) { st.hidden = false; st.textContent = "集計は11/22 23:59で終了しました。この数字が最終の記録です。"; return; }
     if (age > 3 * H) msgs.push(`最後の更新から${span(age)}たっています。運営側のパソコンが止まっている可能性があります。`);
     else if (behind.length) {
       const since = Math.min(...behind.map((k) => lastGot[k] || latest.t));
