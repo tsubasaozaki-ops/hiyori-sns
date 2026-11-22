@@ -127,7 +127,7 @@ def plausible(new, old):
 
 
 def record(args):
-    if now_ms() > END_MS:
+    if now_ms() > END_MS and not os.environ.get("AFTER_CLOSE"):
         print("nothing to record (集計終了)")
         return False
     hist = sync(load_history())
